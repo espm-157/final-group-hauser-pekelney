@@ -3,8 +3,8 @@
 
 ## Team Members:
 
-- full name, github handle
-- full name, github handle
+- Rachel Pekelney, rpekelney
+- Joshua Hauser, jdhauser99
 
 This repository is a template for your team's repository.
 
