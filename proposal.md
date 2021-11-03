@@ -3,7 +3,7 @@ Rachel Pekelney & Joshua Hauser
 
 We are interested in examining wildfire burn severity in California. In recent years, the state has experienced increasingly intense and destructive fire seasons. Often, news coverage focuses on the area burned as a metric for describing and communicating the damage done by major fires. While areal extent is a critical metric to consider when assessing the destructiveness of fires, an additional major concern with these fires is burn severity. Burn severity affects an ecosystem's ability to recover post-fire. In the past several fire seasons, there have been examples of fires (such as the August Complex fire) that leave behind large patches of continuous high severity, which reduces a forest's ability to regenerate since seeds must travel extreme distances from surviving patches of forest. Continuous high severity patches may experience type conversion, meaning the forest will be permanently lost. 
 
-We have obtained a dataset on vegetation burn severity for fires in California. Here is some of the metadata describing the dataset:
+We have obtained a dataset on vegetation burn severity for fires in California. Here is some of the [metadata](https://www.fs.usda.gov/detail/r5/landmanagement/gis/?cid=stelprd3804880) describing the dataset:
 
 "This polygon feature class represents vegetation burn severity calibrated to the Composite Burn Index (CBI) for selected fires in California.
 These data were created by the USDA Forest Service fire and fuels monitoring project to support monitoring of wildland fire and fire regimes. These data will allow better understanding of current fire regimes, improve the accuracy of fire perimeter data, and add spatial data on fire severity and complexity.
