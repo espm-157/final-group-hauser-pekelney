@@ -1,19 +1,18 @@
-# Final project proposal
+# Final project proposal: Examining Changes in Wildfire Burn Severity over time
+Rachel Pekelney & Joshua Hauser
 
+We are interested in examining wildfire burn severity in California. In recent years, the state has experienced increasingly intense and destructive fire seasons. Often, news coverage focuses on the area burned as a metric for describing and communicating the damage done by major fires. While areal extent is a critical metric to consider when assessing the destructiveness of fires, an additional major concern with these fires is burn severity. Burn severity affects an ecosystem's ability to recover post-fire. In the past several fire seasons, there have been examples of fires (such as the August Complex fire) that leave behind large patches of continuous high severity, which reduces a forest's ability to regenerate since seeds must travel extreme distances from surviving patches of forest. Continuous high severity patches may experience type conversion, meaning the forest will be permanently lost. 
 
-Please prepare a short proposal on your final project idea by **Nov 2**. The proposal should include:
+We have obtained a dataset on vegetation burn severity for fires in California. Here is some of the metadata describing the dataset:
 
-- Title & description of the project
-- Your name & partner's name
-- A description of the data required, and how it will be obtained (e.g. URL/DOI to data source)
-- 3 questions / analysis tasks you will perform on the data; in the spirit of the assignments we have been doing.
+"This polygon feature class represents vegetation burn severity calibrated to the Composite Burn Index (CBI) for selected fires in California.
+These data were created by the USDA Forest Service fire and fuels monitoring project to support monitoring of wildland fire and fire regimes. These data will allow better understanding of current fire regimes, improve the accuracy of fire perimeter data, and add spatial data on fire severity and complexity.
+These data are derived from Landsat Thematic Mapper imagery. The pre-fire and post-fire subscenes were used to create a Relative Differenced Normalized Burn Ratio (RdNBR). The RdNBR is correlated to the variation of burn severity within a fire. The RdNBR data are calibrated with the Composite Burn Index (CBI). The severity ratings provided by the derived products listed below are based on the severity to vegetation."
 
-*You may choose to work with your partner or independently on the final project. Please indicate which clearly in your proposal.*
-
-Replicating results of an existing study and exploring the impact of alternative assumptions in the data preparation, statistical methods chosen etc can provide an excellent template for an analysis (you'll see more of this in units 3 & 4)
-
-
-Please create your proposal in a markdown file called `proposal.md` in the root directory of the final project repo.  
+Some questions/analysis tasks we hope to explore:
+1. How big are average high severity patches in recent fires in California?
+2. Is there a correlation between fire perimeter size and fire severity?
+3. How does severity vary within fire perimeters? 
 
 
 ## Project Guidelines
