@@ -6,7 +6,6 @@ output: html_document
 ---
 
 ```{r options, include= FALSE, warning = FALSE}
-install.packages(c("tmap", "raster", "sf", "rosm", "prettymapr", "yaps"))
 library(tmap)      #interactive maps, raster + vector layers
 library(terra)       # Successor to the raster library
 library(tidyverse)   # our old friend
@@ -20,22 +19,23 @@ library(yaps)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Fire perimeters in the ICB
+https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r, results='hide}
+dir.create("../data/fireperimeters")
+download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+unzip("../data/fireperimeters/fire20_1.zip", 
+      exdir = "../data/fireperimeters/fireperimeters")
 ```
 
-## Including Plots
+```{r}
+#can filter by NPS and YNP easily I think. I think to get the ICB fires though we should just manually select them out of the table from "FIRE_NAME"
+fireperimeters = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
+```
+```{r}
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
