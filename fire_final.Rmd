@@ -25,7 +25,6 @@ https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 ```{r, results='hide}
 dir.create("../data/fireperimeters")
 download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
-
 unzip("../data/fireperimeters/fire20_1.zip", 
       exdir = "../data/fireperimeters/fireperimeters")
 ```
@@ -34,8 +33,28 @@ unzip("../data/fireperimeters/fire20_1.zip",
 #can filter by NPS and YNP easily I think. I think to get the ICB fires though we should just manually select them out of the table from "FIRE_NAME"
 fireperimeters = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
 ```
-```{r}
 
+```{r}
+icb_fires = as.tibble(fireperimeters) %>%
+  filter(UNIT_ID == "YNP") %>%
+  filter(YEAR_ > 1971) %>%
+  arrange(YEAR_)
+icb_fires
+```
+
+
+
+```{r}
+dir.create("../data/YosemiteVeg")
+download.file("https://irma.nps.gov/DataStore/DownloadFile/599215", "../data/YosemiteVeg/599215")
+
+unzip("../data/YosemiteVeg/599215", 
+      exdir = "../data/YosemiteVeg/")
+```
+
+```{r}
+# SomethinginYos = rast('../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr')
+tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 ```
 
 
