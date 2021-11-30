@@ -14,6 +14,9 @@ library(rosm) # to work with OSM data
 library(prettymapr)
 library(yaps)
 library(rgdal)
+library(raster)
+library(rgeos)
+library(RColorBrewer)
 ```  
 
 ```{r setup, include=FALSE}
@@ -43,8 +46,6 @@ icb_fires = as.tibble(fireperimeters) %>%
 icb_fires
 ```
 
-
-
 ```{r}
 dir.create("../data/YosemiteVeg")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/599215", "../data/YosemiteVeg/599215")
@@ -59,12 +60,24 @@ tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 ```
 
 ```{r}
-rast("LC08_L1TP_043034_20210618_20210628_02_T1_refl.tif")
+# Landsat rasters for 6/11/21
+rast("LC08_L1TP_042034_20210611_20210622_02_T1_refl.tif")
+rast("LC08_L1TP_042034_20210611_20210622_02_T1_tir.tif")
+rast("LC08_L1TP_042034_20210611_20210622_02_T1_qb.tif")
 
+# NAIP raster
+naip_raster <- rast('m_3711920_se_11_060_20200804.jp2')
 
-raster <- rast('m_3711920_se_11_060_20200804.jp2')
+#trying NDVI calculation
+naip_multispectral_st <- stack(naip_raster)
+naip_multispectral_br <- brick(naip_multispectral_st)
 
-gdal_translate("m_3711920_se_11_060_20200804.jp2", "m_3711920_se_11_060_20200804.tif")
-band1 <- readGDAL("m_3711920_se_11_060_20200804.tif")
+naip_ndvi <- (naip_multispectral_br[[4]] - naip_multispectral_br[[1]]) / (naip_multispectral_br[[4]] + naip_multispectral_br[[1]])
+
+# plot the data
+plot(naip_ndvi,
+     main = "NDVI of Illilouette Creek Basin",
+     axes = FALSE, box = FALSE)
+
 ```
 
