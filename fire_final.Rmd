@@ -61,10 +61,26 @@ tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 
 ```{r}
 # Landsat rasters for 6/11/21
-rast("LC08_L1TP_042034_20210611_20210622_02_T1_refl.tif")
-rast("LC08_L1TP_042034_20210611_20210622_02_T1_tir.tif")
-rast("LC08_L1TP_042034_20210611_20210622_02_T1_qb.tif")
+landsat_raster_refl <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_refl.tif")
+landsat_raster_tir <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_tir.tif")
+landsat_raster_qb <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_qb.tif")
 
+rast_merge <- raster::merge(landsat_raster_refl, landsat_raster_tir)
+
+landsat_multispectral_st <- stack(rast_merge)
+landsat_multispectral_br <- brick(landsat_multispectral_st)
+
+landsat_ndvi <- (landsat_multispectral_br[[5]] - landsat_multispectral_br[[4]]) / (landsat_multispectral_br[[5]] + landsat_multispectral_br[[4]])
+
+# plot the data
+plot(landsat_ndvi,
+     main = "NDVI of Illilouette Creek Basin",
+     axes = FALSE, box = FALSE)
+
+
+```
+
+```{r}
 # NAIP raster
 naip_raster <- rast('m_3711920_se_11_060_20200804.jp2')
 
