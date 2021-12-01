@@ -14,7 +14,6 @@ library(rosm) # to work with OSM data
 library(prettymapr)
 library(yaps)
 library(rgdal)
-library(raster)
 library(rgeos)
 library(RColorBrewer)
 ```  
@@ -61,21 +60,28 @@ tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 
 ```{r}
 # Landsat rasters for 6/11/21
-landsat_raster_refl <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_refl.tif")
-landsat_raster_tir <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_tir.tif")
-landsat_raster_qb <- rast("LC08_L1TP_042034_20210611_20210622_02_T1_qb.tif")
+landsat_raster_b4 <- rast("LC08_L1TP_043034_20210704_20210713_02_T1_B4.TIF")
+landsat_raster_b5 <- rast("LC08_L1TP_043034_20210704_20210713_02_T1_B5.TIF")
 
-rast_merge <- raster::merge(landsat_raster_refl, landsat_raster_tir)
+# projected so everything is in WGS 84 / UTM Zone 10N
+icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
+icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
+# confirming that it successfully reprojected 
+st_crs(icb_shp)
 
-landsat_multispectral_st <- stack(rast_merge)
-landsat_multispectral_br <- brick(landsat_multispectral_st)
+band_list <- c(landsat_raster_b4, landsat_raster_b5)
 
-landsat_ndvi <- (landsat_multispectral_br[[5]] - landsat_multispectral_br[[4]]) / (landsat_multispectral_br[[5]] + landsat_multispectral_br[[4]])
+# b4b5 <- stack(band_list)
+
+landsat_ndvi <- (landsat_raster_b4 - landsat_raster_b5) / (landsat_raster_b5 + landsat_raster_b4)
+
+icb_bbox <- st_bbox(c(xmin = 263981.057935, xmax = 289328.931675, ymax = 4181703.867149, ymin = 4159160.072076))
+
 
 # plot the data
-plot(landsat_ndvi,
-     main = "NDVI of Illilouette Creek Basin",
-     axes = FALSE, box = FALSE)
+
+tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
+
 
 
 ```
