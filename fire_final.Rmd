@@ -103,3 +103,13 @@ plot(naip_ndvi,
 
 ```
 
+
+Landsat 1-3 
+Band 5 = red
+Band 7 = NIR
+date 9/16/1972
+
+Landsat 8
+Band 4 = red
+Band 5 = NIR
+need to find a cloud-free Sept. date
