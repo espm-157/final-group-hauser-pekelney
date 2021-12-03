@@ -112,4 +112,4 @@ date 9/16/1972
 Landsat 8
 Band 4 = red
 Band 5 = NIR
-need to find a cloud-free Sept. date
+date 9/15/2021
