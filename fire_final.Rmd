@@ -14,6 +14,7 @@ library(rosm) # to work with OSM data
 library(prettymapr)
 library(yaps)
 library(rgdal)
+library(raster)
 ```  
 
 ```{r setup, include=FALSE}
@@ -32,7 +33,13 @@ unzip("../data/fireperimeters/fire20_1.zip",
 
 ```{r}
 #can filter by NPS and YNP easily I think. I think to get the ICB fires though we should just manually select them out of the table from "FIRE_NAME"
-fireperimeters = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
+fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
+
+# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
+# load Landsat raster first to have CRS available for reference
+landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
+
+fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```
 
 ```{r}
@@ -49,12 +56,14 @@ dir.create("../data/YosemiteVeg")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/599215", "../data/YosemiteVeg/599215")
 unzip("../data/YosemiteVeg/599215", 
       exdir = "../data/YosemiteVeg/")
+
 ```
 
 ```{r}
 # SomethinginYos = rast('../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr')
 tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 ```
+
 ```{r, , results=hide}
 # unzipping boundary for Yosemite National Park
 
@@ -93,8 +102,6 @@ icb_bbox <- st_bbox(c(xmin = 263981.057935, xmax = 289328.931675, ymax = 4181703
 # plot the data
 tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
 
-
-
 ```
 
 ```{r}
@@ -110,6 +117,18 @@ landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raste
 
 # plot the data
 tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
+
+```
+Fire Perimeters Mapped onto true color Landsat basemap
+```{r}
+landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
+rgb = brick(landsat_refl_21)
+rgb_stack = stack(rgb)
+
+cropped = crop(rgb_stack, yos_bound)
+
+tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_raster() +
+  tm_shape(fireperimeters) + tm_polygons(alpha = 0.1)
 
 ```
 
