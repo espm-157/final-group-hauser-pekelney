@@ -47,7 +47,6 @@ icb_fires
 ```{r}
 dir.create("../data/YosemiteVeg")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/599215", "../data/YosemiteVeg/599215")
-
 unzip("../data/YosemiteVeg/599215", 
       exdir = "../data/YosemiteVeg/")
 ```
@@ -56,35 +55,64 @@ unzip("../data/YosemiteVeg/599215",
 # SomethinginYos = rast('../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr')
 tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
 ```
+```{r, , results=hide}
+# unzipping boundary for Yosemite National Park
+
+dir.create("../data/yosemiteboundary")
+download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
+unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
+      exdir = "../data/yosemiteboundary/yosemiteboundary")
+
+yos_bound_nad83 = st_read("../data/yosemiteboundary/yosemiteboundary")
+
+# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
+yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
+```
 
 ```{r}
-# Landsat rasters for 6/11/21
+# Landsat rasters for 9/15/21
 landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
 
 # projected so everything is in WGS 84 / UTM Zone 10N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
 icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
-# confirming that it successfully reprojected 
+# confirming that it successfully re-projected 
 st_crs(icb_shp)
 
 band_list <- c(landsat_raster_b4, landsat_raster_b5)
 
 # b4b5 <- stack(band_list)
 
-landsat_ndvi <- (landsat_raster_b4 - landsat_raster_b5) / (landsat_raster_b5 + landsat_raster_b4)
-
+# for Landsat 8 [B4 = Red and B5 = NIR]
+# NDVI = (NIR - Red) / (NIR + Red)
+landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
 
 icb_bbox <- st_bbox(c(xmin = 263981.057935, xmax = 289328.931675, ymax = 4181703.867149, ymin = 4159160.072076))
 
-
 # plot the data
-
 tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
 
 
 
 ```
+
+```{r}
+# Landsat rasters for 9/16/1972
+landsat72_raster_b5 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B5.TIF")
+landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
+
+band_list72 <- c(landsat_raster_b4, landsat_raster_b5)
+
+# for Landsat 1-3 [B5 = red and B7 = NIR] 
+# NDVI = (NIR - Red) / (NIR + Red)
+landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raster_b7 + landsat72_raster_b5)
+
+# plot the data
+tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
+
+```
+
 
 ```{r}
 # NAIP raster
