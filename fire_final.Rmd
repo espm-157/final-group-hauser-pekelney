@@ -82,41 +82,47 @@ st_crs(icb_shp)
 landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
 
 # plot the data
-tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
+tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title="NDVI Index Value") + 
+  tm_shape(icb_shp) + tm_polygons(alpha=0) +
+  tm_compass(size=1) + tm_scale_bar() + 
+  tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE)
 
 ```
-```{r}
-# histogram of NDVI 2021
-
-hist(landsat_ndvi,
-  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 2021",
-  col = "springgreen",
-  xlab = "NDVI Index Value")
-```
-
 
 ```{r}
 # Landsat rasters for 9/16/1972
 landsat72_raster_b5 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B5.TIF")
 landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
 
-band_list72 <- c(landsat_raster_b4, landsat_raster_b5)
-
 # for Landsat 1-3 [B5 = red and B7 = NIR] 
 # NDVI = (NIR - Red) / (NIR + Red)
 landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raster_b7 + landsat72_raster_b5)
 
 # plot the data
-tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
+tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + tm_raster(midpoint = 0, title="NDVI Index Value") + 
+  tm_shape(icb_shp) + tm_polygons(alpha=0) +
+  tm_compass(size=1) + tm_scale_bar() + 
+  tm_layout(main.title="NDVI in ICB (1972)", legend.outside = TRUE)
 
 ```
-```{r}
-# histogram of NDVI 1972
 
-hist(landsat_ndvi72,
+```{r}
+# histogram of NDVI 2021
+cropped21 = crop(landsat_ndvi, icb_shp)
+cropped72 = crop(landsat_ndvi72, icb_shp)
+
+hist(cropped21,
+  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 2021",
+  col = "springgreen",
+  xlab = "NDVI Index Value")
+
+# histogram of NDVI 1972
+hist(cropped72,
+     add=T,
   main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 1972",
   col = "springgreen",
   xlab = "NDVI Index Value")
+
 ```
 
 Fire Perimeters Mapped onto true color Landsat basemap
@@ -131,14 +137,18 @@ plotRGB(cropped)
 fire_shp = st_read("California_Wildland_Fire_Perimeters_(All)/California_Wildland_Fire_Perimeters_(All).shp")
 fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
 
-tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
-  tm_shape(fire_shp_reproj, bbox = st_bbox(yos_bound)) + tm_polygons(alpha = 0.1)
+keep <- st_is_valid(fire_shp_reproj)
 
 tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
-  tm_polygons(fireperimeters$Shape) +
-  tm_compass(size=1) + tm_scale_bar()
- 
-tm_borders(fireperimeters$Shape) + tm_polygons(alpha = 0.1)
+  fire_shp_reproj %>% filter(keep) %>% tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
+  tm_shape(yos_bound, name="Yosemite Nat'l Park") + tm_polygons(border.col = "blue",  alpha = 0) + 
+  tm_shape(icb_shp, name="ICB") + tm_polygons(border.col = "white",  alpha = 0) +
+  tm_compass(size=1) + tm_scale_bar() + 
+  tm_layout(legend.outside=TRUE, 
+            main.title="Fire Perimeters in Yosemite National Park",
+            legend.text.size = 0.5,
+            legend.position = c("left", "bottom"))
+
 ```
 
 
@@ -151,9 +161,10 @@ naip_multispectral_st <- stack(naip_raster)
 naip_multispectral_br <- brick(naip_multispectral_st)
 
 naip_ndvi <- (naip_multispectral_br[[4]] - naip_multispectral_br[[1]]) / (naip_multispectral_br[[4]] + naip_multispectral_br[[1]])
+cropped_naip <- crop(naip_ndvi, yos_bound)
 
 # plot the data
-plot(naip_ndvi,
+plot(cropped_naip,
      main = "NDVI of Illilouette Creek Basin",
      axes = FALSE, box = FALSE)
 
