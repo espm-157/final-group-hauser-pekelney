@@ -108,10 +108,11 @@ rgb = brick(landsat_refl_21)
 rgb_stack = stack(rgb)
 
 cropped = crop(rgb, yos_bound)
-plotRGB(cropped)
 tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
-  tm_shape(fireperimeters) + tm_polygons(alpha = 0.1)
-
+  tm_polygons(fireperimeters$Shape) +
+  tm_compass(size=1) + tm_scale_bar()
+ 
+tm_borders(fireperimeters$Shape) + tm_polygons(alpha = 0.1)
 ```
 
 
