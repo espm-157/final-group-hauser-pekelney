@@ -107,9 +107,9 @@ landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
 rgb_stack = stack(rgb)
 
-cropped = crop(rgb_stack, yos_bound)
-
-tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_raster() +
+cropped = crop(rgb, yos_bound)
+plotRGB(cropped)
+tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
   tm_shape(fireperimeters) + tm_polygons(alpha = 0.1)
 
 ```
