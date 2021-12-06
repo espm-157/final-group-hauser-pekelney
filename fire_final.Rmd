@@ -89,10 +89,6 @@ icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
 # confirming that it successfully re-projected 
 st_crs(icb_shp)
 
-band_list <- c(landsat_raster_b4, landsat_raster_b5)
-
-# b4b5 <- stack(band_list)
-
 # for Landsat 8 [B4 = Red and B5 = NIR]
 # NDVI = (NIR - Red) / (NIR + Red)
 landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
@@ -103,6 +99,15 @@ icb_bbox <- st_bbox(c(xmin = 263981.057935, xmax = 289328.931675, ymax = 4181703
 tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
 
 ```
+```{r}
+# histogram of NDVI 2021
+
+hist(landsat_ndvi,
+  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 2021",
+  col = "springgreen",
+  xlab = "NDVI Index Value")
+```
+
 
 ```{r}
 # Landsat rasters for 9/16/1972
@@ -119,16 +124,29 @@ landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raste
 tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
 
 ```
+```{r}
+# histogram of NDVI 1972
+
+hist(landsat_ndvi72,
+  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 1972",
+  col = "springgreen",
+  xlab = "NDVI Index Value")
+```
+
 Fire Perimeters Mapped onto true color Landsat basemap
 ```{r}
 landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
 rgb_stack = stack(rgb)
 
-cropped = crop(rgb_stack, yos_bound)
+cropped = crop(rgb, yos_bound)
+plotRGB(cropped)
 
-tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_raster() +
-  tm_shape(fireperimeters) + tm_polygons(alpha = 0.1)
+fire_shp = st_read("California_Wildland_Fire_Perimeters_(All)/California_Wildland_Fire_Perimeters_(All).shp")
+fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
+
+tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
+  tm_shape(fire_shp_reproj, bbox = st_bbox(yos_bound)) + tm_polygons(alpha = 0.1)
 
 ```
 
