@@ -44,25 +44,13 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 
 ```{r}
 # will need to re-project fire perimeters to different CRS: WGS 84 / UTM Zone 10N
-icb_fires = as.tibble(fireperimeters) %>%
+yos_fires = as.tibble(fireperimeters) %>%
   filter(UNIT_ID == "YNP") %>%
   filter(YEAR_ > 1971) %>%
   arrange(YEAR_)
-icb_fires
+yos_fires
 ```
 
-```{r}
-dir.create("../data/YosemiteVeg")
-download.file("https://irma.nps.gov/DataStore/DownloadFile/599215", "../data/YosemiteVeg/599215")
-unzip("../data/YosemiteVeg/599215", 
-      exdir = "../data/YosemiteVeg/")
-
-```
-
-```{r}
-# SomethinginYos = rast('../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr')
-tm_shape("../data/YosemiteVeg/yosegeodata/YOSE_VegPolys.lyr") + tm_polygons()
-```
 
 ```{r, , results=hide}
 # unzipping boundary for Yosemite National Park
@@ -89,15 +77,9 @@ icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
 # confirming that it successfully re-projected 
 st_crs(icb_shp)
 
-band_list <- c(landsat_raster_b4, landsat_raster_b5)
-
-# b4b5 <- stack(band_list)
-
 # for Landsat 8 [B4 = Red and B5 = NIR]
 # NDVI = (NIR - Red) / (NIR + Red)
 landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
-
-icb_bbox <- st_bbox(c(xmin = 263981.057935, xmax = 289328.931675, ymax = 4181703.867149, ymin = 4159160.072076))
 
 # plot the data
 tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = NA) + tm_shape(icb_shp) + tm_polygons(alpha=0)
