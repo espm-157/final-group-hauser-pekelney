@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Fire perimeters in the ICB
 https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 
-```{r, results= 'hide' }
+```{r, results= 'hide', message=FALSE}
 dir.create("../data/fireperimeters")
 download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
 unzip("../data/fireperimeters/fire20_1.zip", 
@@ -54,12 +54,14 @@ yos_fires
 yos_fires %>% 
   group_by(YEAR_) %>% 
   summarise(n=n()) %>%
-  ggplot(aes(x=YEAR_)) + geom_point(aes(y=n))
+  mutate(YEAR_, Year = as.numeric(YEAR_)) %>% 
+  ggplot(aes(x=Year, y=n)) + geom_point(color="red", alpha=0.5) +
+  labs(y = "Number of Fires", title = "Number of Fires in Yosemite per Year since 1972")
 
 ```
 
 
-```{r, , results=hide}
+```{r, results=hide, message=FALSE}
 # unzipping boundary for Yosemite National Park
 
 dir.create("../data/yosemiteboundary")
@@ -130,6 +132,7 @@ hist((cropped72),
   xlab = "NDVI Index Value")
 
 ```
+
 ```{r}
 df21 = as.data.frame(cropped21) %>%
   mutate(range = cut(LC08_L1TP_042034_20210915_20210925_02_T1_B5, c(-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1))) %>%
