@@ -31,7 +31,7 @@ unzip("../data/fireperimeters/fire20_1.zip",
       exdir = "../data/fireperimeters/fireperimeters")
 ```
 
-```{r}
+```{r, message=FALSE}
 #can filter by NPS and YNP easily I think. I think to get the ICB fires though we should just manually select them out of the table from "FIRE_NAME"
 fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
 
@@ -43,12 +43,19 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```
 
 ```{r}
-# will need to re-project fire perimeters to different CRS: WGS 84 / UTM Zone 10N
+# fire perimeters have been re-projected to CRS: WGS 84 / UTM Zone 10N
 yos_fires = as.tibble(fireperimeters) %>%
   filter(UNIT_ID == "YNP") %>%
   filter(YEAR_ > 1971) %>%
   arrange(YEAR_)
 yos_fires
+
+yos_fires %>% 
+  group_by("YEAR_") %>% 
+  summarise(n=n())
+
+
+  ggplot(aes(x = ))
 ```
 
 
@@ -144,7 +151,6 @@ rgb = brick(landsat_refl_21)
 rgb_stack = stack(rgb)
 
 cropped = crop(rgb, yos_bound)
-plotRGB(cropped)
 
 fire_shp = st_read("California_Wildland_Fire_Perimeters_(All)/California_Wildland_Fire_Perimeters_(All).shp")
 fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
