@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Fire perimeters in the ICB
 https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 
-```{r, results='hide}
+```{r, results= 'hide' }
 dir.create("../data/fireperimeters")
 download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
 unzip("../data/fireperimeters/fire20_1.zip", 
