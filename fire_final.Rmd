@@ -44,18 +44,18 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 
 ```{r}
 # fire perimeters have been re-projected to CRS: WGS 84 / UTM Zone 10N
-yos_fires = as.tibble(fireperimeters) %>%
+fireperimetersCA = as.tibble(fireperimeters) 
+yos_fires = fireperimetersCA %>%
   filter(UNIT_ID == "YNP") %>%
   filter(YEAR_ > 1971) %>%
   arrange(YEAR_)
 yos_fires
 
 yos_fires %>% 
-  group_by("YEAR_") %>% 
-  summarise(n=n())
+  group_by(YEAR_) %>% 
+  summarise(n=n()) %>%
+  ggplot(aes(x=YEAR_)) + geom_point(aes(y=n))
 
-
-  ggplot(aes(x = ))
 ```
 
 
