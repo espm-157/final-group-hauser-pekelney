@@ -22,6 +22,13 @@ library(raster)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire
+
+## Introduction
+
+
+
+
 ## Fire perimeters in the ICB
 https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 
@@ -130,9 +137,9 @@ resampled_ndvi21 <- resample(landsat_ndvi, landsat_ndvi72, method = "bilinear")
 
 tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title="NDVI Index Value") + 
   tm_shape(icb_shp) + tm_polygons(alpha=0) +
+  tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE) +
   tm_compass(size=1) + tm_scale_bar() + 
-  tm_layout(main.title="NDVI in ICB (2021) resampled to 60x60m resolution", legend.outside = TRUE)
-
+  tm_credits("resampled to 60x60m resolution", position=c("RIGHT", "BOTTOM"))
 
 ```
 
@@ -176,6 +183,8 @@ ggplot() +
 ```
 
 ```{r}
+# charting distributions of NDVI without resampling raster resolution
+
 df21 = as.data.frame(cropped21) %>%
   mutate(range = cut(LC08_L1TP_042034_20210915_20210925_02_T1_B5, c(-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1))) %>%
   group_by(range) %>%
@@ -195,7 +204,7 @@ geom_col(data=df21, aes(x=range, y=percent), fill='blue', color = "blue") +
 geom_col(data=df72, aes(x=range, y=percent), fill='yellow', color = "yellow", alpha = .8) + ggtitle("Distribution of NDVI values in the ICB: 2021 (blue) and 1972 (yellow)")
 ```
 
-Fire Perimeters Mapped onto true color Landsat basemap
+## Fire Perimeters Mapped onto true color Landsat basemap
 ```{r, message=FALSE}
 landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
@@ -212,7 +221,7 @@ tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
   fire_shp_reproj %>% filter(keep) %>% tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
   tm_shape(yos_bound, name="Yosemite Nat'l Park") + tm_polygons(border.col = "blue",  alpha = 0) + 
   tm_shape(icb_shp, name="ICB") + tm_polygons(border.col = "white",  alpha = 0) +
-  tm_compass(size=1) + tm_scale_bar() + 
+  tm_compass(size=1) + tm_scale_bar(size=0.3) + 
   tm_layout(legend.outside=TRUE, 
             main.title="Fire Perimeters in Yosemite National Park",
             legend.text.size = 0.5,
@@ -238,13 +247,35 @@ plot(cropped_naip,
 
 ```
 
+## Sources
 
-Landsat 1-3 
-Band 5 = red
-Band 7 = NIR
-date 9/16/1972
+### Fire Perimeters: 
+[CAL FIRE Fire Perimeters](https://data.ca.gov/dataset/fire-perimeters1) downloaded from the CA State Open Data Portal, updated Dec. 2021 
 
-Landsat 8
-Band 4 = red
-Band 5 = NIR
-date 9/15/2021
+### ICB Shapefile:
+Sourced from [Dr. Brandon M. Collins](https://nature.berkeley.edu/stephenslab/lab-members/dr-brandon-collins/), Berkeley Forests
+
+### Yosemite Nat'l Park Boundary: 
+Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataStore/)
+[Park boundary updated as of 2006](https://irma.nps.gov/DataStore/Reference/Profile/2170436)
+
+### Landsat Rasters:
+Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
+  Landsat 1-3 
+    Band 5 = red
+    Band 7 = NIR
+    date: 9/16/1972
+  Landsat 8
+    Band 4 = red
+    Band 5 = NIR
+    date: 9/15/2021
+    
+    
+## Papers for Reference
+
+https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe
+https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf
+https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf 
+https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf
+
+
