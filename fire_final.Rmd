@@ -24,14 +24,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Fire perimeters in the ICB
 https://frap.fire.ca.gov/frap-projects/fire-perimeters/
 
-```{r, results= 'hide', message=FALSE}
+```{r, results= 'hide', message=FALSE, warning=FALSE}
 dir.create("../data/fireperimeters")
 download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
 unzip("../data/fireperimeters/fire20_1.zip", 
       exdir = "../data/fireperimeters/fireperimeters")
 ```
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 #can filter by NPS and YNP easily I think. I think to get the ICB fires though we should just manually select them out of the table from "FIRE_NAME"
 fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb")
 
@@ -44,20 +44,18 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 
 ```{r}
 # fire perimeters have been re-projected to CRS: WGS 84 / UTM Zone 10N
-fireperimetersCA = as.tibble(fireperimeters) 
+fireperimetersCA = as_tibble(fireperimeters) 
 
 # fire perimeters in Yosemite, post-1972 only
 yos_fires_post72 = fireperimetersCA %>%
   filter(UNIT_ID == "YNP") %>%
   filter(YEAR_ > 1971) %>%
   arrange(YEAR_)
-yos_fires_post72
 
 # fire perimeters in Yosemite, all historical data
 yos_fires = fireperimetersCA %>%
   filter(UNIT_ID == "YNP") %>%
   arrange(YEAR_)
-yos_fires
 
 # plotting number of fires per year since earliest data recorded
 yos_fires %>% 
@@ -65,13 +63,13 @@ yos_fires %>%
   summarise(n=n()) %>%
   mutate(YEAR_, Year = as.numeric(YEAR_)) %>% 
   ggplot(aes(x=Year, y=n)) + geom_col(fill="red", alpha=0.5) +
-  labs(y = "Number of Fires", title = "Number of fires annually in Yosemite Nat'l Park") +
+  labs(y = "Number of Fires", title = "Number of fires annually in Yosemite Nat'l Park (1933-2020") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 
 ```
 
 
-```{r, results=hide, message=FALSE}
+```{r, results=hide, message=FALSE, warning=FALSE}
 # unzipping boundary for Yosemite National Park
 
 dir.create("../data/yosemiteboundary")
@@ -126,6 +124,13 @@ tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + tm_raster(midp
 ```
 
 ```{r}
+# adjusting for different resolution in Landsat data from 1972 and 2021
+resampled21 <- projectRaster(landsat_ndvi, landsat_ndvi72, method = "bilinear")
+
+```
+
+
+```{r}
 # histogram of NDVI 2021
 cropped21 = crop(landsat_ndvi, icb_shp)
 cropped72 = crop(landsat_ndvi72, icb_shp)
@@ -164,7 +169,7 @@ geom_col(data=df72, aes(x=range, y=percent), fill='yellow', color = "yellow", al
 ```
 
 Fire Perimeters Mapped onto true color Landsat basemap
-```{r}
+```{r, message=FALSE}
 landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
 rgb_stack = stack(rgb)
@@ -189,7 +194,7 @@ tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
 ```
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # NAIP raster
 naip_raster <- rast('m_3711920_se_11_060_20200804.jp2')
 
@@ -198,7 +203,6 @@ naip_multispectral_st <- stack(naip_raster)
 naip_multispectral_br <- brick(naip_multispectral_st)
 
 naip_ndvi <- (naip_multispectral_br[[4]] - naip_multispectral_br[[1]]) / (naip_multispectral_br[[4]] + naip_multispectral_br[[1]])
-cropped_naip <- crop(naip_ndvi, yos_bound)
 
 # plot the data
 plot(cropped_naip,
