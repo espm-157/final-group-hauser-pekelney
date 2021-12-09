@@ -26,8 +26,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
+The Illilouette Creek Basin (ICB) is an area within Yosemite National Park that has experienced nearly half a century of managed wildfire, or naturally ignited fires that are permitted to burn in wilderness areas under the supervision of park and fire managers. The National Park Service adopted a policy of managed wildfire in the ICB in 1972. Preceded by a century of fire suppression, the managed wildfire period in the ICB has provided many insights into the role of fire as a disturbance and ecosystem process affecting vegetation structure, biodiversity, and water supply. 
 
+The ICB is a critical zone for research into the potential for managed wildfire to be used more broadly throughout Sierra Nevada forests to increase resiliency in the face of climate change. 
 
+- give info on size of ICB, number of fires burned there, overview on the role of fire as an ecosystem process, what we would expect to see in terms of dNDVI between 1972 and present
 
 ## Fire perimeters in the ICB
 https://frap.fire.ca.gov/frap-projects/fire-perimeters/
@@ -180,6 +183,11 @@ ggplot() +
   ggtitle("Distribution of NDVI values in the ICB: 2021 (blue) vs 1972 (yellow)") +
   labs(x = "NDVI Index Value", y = "Frequency", subtitle = "Landsat rasters 60x60m resolution")
 
+# calculate a deltaNDVI between average NDVI in 1972 and 2021
+mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
+# average NDVI in ICB is higher in 2021 than 1972
+
 ```
 
 ```{r}
@@ -261,11 +269,11 @@ Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataSto
 
 ### Landsat Rasters:
 Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
-  Landsat 1-3 
+  [Landsat 1-3](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
     Band 5 = red
     Band 7 = NIR
     date: 9/16/1972
-  Landsat 8
+  [Landsat 8](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
     Band 4 = red
     Band 5 = NIR
     date: 9/15/2021
