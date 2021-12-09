@@ -45,18 +45,28 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```{r}
 # fire perimeters have been re-projected to CRS: WGS 84 / UTM Zone 10N
 fireperimetersCA = as.tibble(fireperimeters) 
-yos_fires = fireperimetersCA %>%
+
+# fire perimeters in Yosemite, post-1972 only
+yos_fires_post72 = fireperimetersCA %>%
   filter(UNIT_ID == "YNP") %>%
   filter(YEAR_ > 1971) %>%
   arrange(YEAR_)
+yos_fires_post72
+
+# fire perimeters in Yosemite, all historical data
+yos_fires = fireperimetersCA %>%
+  filter(UNIT_ID == "YNP") %>%
+  arrange(YEAR_)
 yos_fires
 
+# plotting number of fires per year since earliest data recorded
 yos_fires %>% 
   group_by(YEAR_) %>% 
   summarise(n=n()) %>%
   mutate(YEAR_, Year = as.numeric(YEAR_)) %>% 
-  ggplot(aes(x=Year, y=n)) + geom_point(color="red", alpha=0.5) +
-  labs(y = "Number of Fires", title = "Number of Fires in Yosemite per Year since 1972")
+  ggplot(aes(x=Year, y=n)) + geom_col(fill="red", alpha=0.5) +
+  labs(y = "Number of Fires", title = "Number of fires annually in Yosemite Nat'l Park") +
+  geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 
 ```
 
@@ -139,6 +149,12 @@ df21 = as.data.frame(cropped21) %>%
   group_by(range) %>%
   summarise(n=n()) %>%
   mutate(percent = 100 * n/(531* 590))
+
+df72 = as.data.frame(cropped72) %>%
+  mutate(range = cut(LM01_L1TP_045034_19720916_20200909_02_T2_B7, c(-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1))) %>%
+  group_by(range) %>%
+  summarise(n=n()) %>%
+  mutate(percent = 100 * n/(265*295))
 
 colors = c("1972" = "yellow", "2021" = "blue")
 
