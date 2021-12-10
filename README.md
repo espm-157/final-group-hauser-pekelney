@@ -3,12 +3,6 @@
 
 ## Team Members:
 
-- Rachel Pekelney, rpekelney
-- Joshua Hauser, jdhauser99
-
-
-## NDVI in the Illilouette Creek Basin: Examining changes after the introduction of managed wildfire 
-
 - Rachel Pekelney, rpekelney https://github.com/rpekelney
 - Joshua Hauser, jdhauser99 https://github.com/jdhauser99
 
