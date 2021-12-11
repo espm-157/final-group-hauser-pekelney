@@ -26,14 +26,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-The Illilouette Creek Basin (ICB) is an area within Yosemite National Park that has experienced nearly half a century of managed wildfire, or naturally ignited fires that are permitted to burn in wilderness areas under the supervision of park and fire managers. The National Park Service adopted a policy of managed wildfire in the ICB in 1972. Preceded by a century of fire suppression, the managed wildfire period in the ICB has provided many insights into the role of fire as a disturbance and ecosystem process affecting vegetation structure, biodiversity, and water supply. 
+The Illilouette Creek Basin (ICB) is a [150 km^2^ area within Yosemite National Park](https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe) that has experienced nearly half a century of managed wildfire, or naturally ignited fires that are permitted to burn in wilderness areas under the supervision of park and fire managers. The National Park Service adopted a policy of managed wildfire in the ICB in 1972. Preceded by a century of fire suppression, the managed wildfire period in the ICB has provided many insights into the role of fire as a disturbance and ecosystem process affecting vegetation structure, biodiversity, and water supply. 
 
-The ICB is a critical zone for research into the potential for managed wildfire to be used more broadly throughout Sierra Nevada forests to increase resiliency in the face of climate change. 
+The ICB is a critical zone for research into the potential for managed wildfire to be used more broadly throughout Sierra Nevada forests to increase resiliency in the face of climate change. Only [8 hectares](https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe) are known to have burned in the ICB between 1880-1973, whereas post-1972 over 50% of the total area in the basin has burned. 
 
-- give info on size of ICB, number of fires burned there, overview on the role of fire as an ecosystem process, what we would expect to see in terms of dNDVI between 1972 and present
+Overview of fire as an ecological process and indigenous fire use
+
+Based on the [scientific literature](https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf), forest ecologists have concluded that the reintroduction of wildfire reduces forest density and increases biodiversity through type conversion to shrubs and meadows in addition to mixed conifer forest. We wanted to examine this change by looking at NDVI values before and after the introduction of managed wildfire. [NDVI (Normalized Difference Vegetation Index)](https://www.usgs.gov/special-topics/remote-sensing-phenology/science/ndvi-foundation-remote-sensing-phenology) is a measure of relative greeness or vegetation health. Our hypothesis was that NDVI in the ICB would have decreased overtime after the introduction of managed wildfire due to this type conversion. 
+
+- number of fires burned there, overview on the role of fire as an ecosystem process, what we would expect to see in terms of dNDVI between 1972 and present
 
 ## Fire perimeters in the ICB
-https://frap.fire.ca.gov/frap-projects/fire-perimeters/
+
+First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for Yosemite National Park as a whole to contextualize the change in fire patterns after 1972. 
 
 ```{r, results= 'hide', message=FALSE, warning=FALSE}
 dir.create("../data/fireperimeters")
@@ -43,7 +48,6 @@ unzip("../data/fireperimeters/fire20_1.zip",
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-# can filter by NPS and YNP to get fires in Yosemite
 fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
 
 # load Landsat raster first to have CRS available for reference
@@ -78,11 +82,22 @@ yos_fires %>%
 
 # purple dotted line falls at year 1972, the beginning of the managed wildfire period
 ```
+Our first chart shows the number of fires that occurred each year within the bounds of Yosemite National Park. The number of fires each year increased dramatically after 1972 (purple dotted line), when the NPS changed its policy to allow for managed wildfire. The period of fire suppression prior to 1972 experienced few fires. In more recent years, we see a spike in the number of fires; this is likely due to [climate change](https://www.washingtonpost.com/politics/2020/12/22/biden-wildfires/). 
 
+```{r}
+yos_fires %>% 
+  mutate(YEAR_, Year = as.numeric(YEAR_)) %>%
+  dplyr::select(Year, GIS_ACRES) %>%
+  group_by(Year) %>%
+  summarise(Acres_Burned = sum(GIS_ACRES)) %>%
+  ggplot(aes(x=Year, y=Acres_Burned)) + geom_col(fill="red", alpha=0.5) +
+  labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
+  geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
+```
+Another way to represent the change in fire patterns after the introduction of managed wildfire is through 
 
 ```{r, results=hide, message=FALSE, warning=FALSE}
 # unzipping boundary for Yosemite National Park
-
 dir.create("../data/yosemiteboundary")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
 unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
@@ -153,19 +168,6 @@ cropped21_rs = crop(resampled_ndvi21, icb_shp)
 cropped21 = crop(landsat_ndvi, icb_shp)
 cropped72 = crop(landsat_ndvi72, icb_shp)
 
-# histogram of NDVI 2021 (resampled)
-hist((cropped21_rs),
-  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 2021",
-  col = "orange",
-  xlab = "NDVI Index Value")
-
-# histogram of NDVI 1972
-hist((cropped72),
-  main = "NDVI: Distribution of pixels\n Illilouette Creek Basin 1972",
-  col = "blue",
-  add = T, 
-  xlab = "NDVI Index Value")
-
 # overlay histograms with ggplot
 df_21 = as.data.frame(cropped21_rs) 
 df_72 = as.data.frame(cropped72) 
@@ -186,6 +188,9 @@ ggplot() +
 # calculate a deltaNDVI between average NDVI in 1972 and 2021
 mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
 mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
+
+median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 # average NDVI in ICB is higher in 2021 than 1972
 
 ```
@@ -238,27 +243,11 @@ tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
 ```
 
 
-```{r, message=FALSE, warning=FALSE}
-# NAIP raster
-naip_raster <- rast('m_3711920_se_11_060_20200804.jp2')
-
-#trying NDVI calculation
-naip_multispectral_st <- stack(naip_raster)
-naip_multispectral_br <- brick(naip_multispectral_st)
-
-naip_ndvi <- (naip_multispectral_br[[4]] - naip_multispectral_br[[1]]) / (naip_multispectral_br[[4]] + naip_multispectral_br[[1]])
-
-# plot the data
-plot(cropped_naip,
-     main = "NDVI of Illilouette Creek Basin",
-     axes = FALSE, box = FALSE)
-
-```
-
 ## Sources
 
 ### Fire Perimeters: 
-[CAL FIRE Fire Perimeters](https://data.ca.gov/dataset/fire-perimeters1) downloaded from the CA State Open Data Portal, updated Dec. 2021 
+[CAL FIRE Fire Perimeters](https://data.ca.gov/dataset/fire-perimeters1) downloaded from the CA State Open Data Portal, updated Dec. 2021 (used for mapping)
+[FRAP Fire Perimeters](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) (used for charting area burned annually and fires per year in Yosemite)
 
 ### ICB Shapefile:
 Sourced from [Dr. Brandon M. Collins](https://nature.berkeley.edu/stephenslab/lab-members/dr-brandon-collins/), Berkeley Forests
@@ -285,5 +274,3 @@ https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe
 https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf
 https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf 
 https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf
-
-
