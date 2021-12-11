@@ -1,7 +1,7 @@
 ---
-title: "fire.Rmd"
+title: "NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire"
 author: "Rachel Pekelney & Joshua Hauser"
-date: "11/28/2021"
+date: "Updated: 12 December 2021"
 output: html_document
 ---
 
@@ -22,7 +22,6 @@ library(raster)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire
 
 ## Introduction
 
@@ -52,7 +51,7 @@ unzip("../data/fireperimeters/fire20_1.zip",
       exdir = "../data/fireperimeters/fireperimeters")
 ```
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
 fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
 
 # load Landsat raster first to have CRS available for reference
@@ -62,7 +61,7 @@ landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
 # accessing boundary for Yosemite National Park
 dir.create("../data/yosemiteboundary")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
@@ -78,7 +77,7 @@ yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
 
 #### Fire Perimeters Mapped onto true color Landsat basemap
 The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed in red. 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
 # projected so everything is in WGS 84 / UTM Zone 10N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
 icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
