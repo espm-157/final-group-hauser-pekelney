@@ -66,6 +66,7 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 # accessing boundary for Yosemite National Park
 dir.create("../data/yosemiteboundary")
 download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
+
 unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
       exdir = "../data/yosemiteboundary/yosemiteboundary")
 
