@@ -211,7 +211,8 @@ ggplot() +
   geom_histogram(data=df_21, 
                  aes(x=LC08_L1TP_042034_20210915_20210925_02_T1_B5, fill=LC08_L1TP_042034_20210915_20210925_02_T1_B5),
                  fill="blue",
-                 color="blue") + 
+                 color="blue",
+                 alpha = .9) + 
   geom_histogram(data=df_72, 
                  aes(x=LM01_L1TP_045034_19720916_20200909_02_T2_B7, fill=LM01_L1TP_045034_19720916_20200909_02_T2_B7), 
                  fill="yellow",
@@ -255,8 +256,7 @@ Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
     Band 5 = NIR
     date: 9/15/2021
     
-    
-## Papers for Reference
+### Papers for Reference
 
 https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe
 https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf
