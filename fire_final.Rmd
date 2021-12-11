@@ -259,7 +259,11 @@ Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
     
 ### Papers for Reference
 
-https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe
-https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf
-https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf 
-https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf
+[Boisrame, G., Thompson, S., Collins, B., Stephens, S. (2016). Managed Wildfire Effects on Forest Resilience and Water in the Sierra Nevada. Ecosystems, 20(4).](https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe)
+
+[Hedges, R., Boisrame, G. (2019). Illilouette Creek Basin Research and Publications. UC Berkeley Stephens Lab.](https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf)
+
+[Stephens, S. et al. (2021). Fire, water, and biodiversity in the Sierra Nevada: a possible triple win. Environmental Research Communications, 3.](https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf)
+
+[Collins, B.M. et al. (2009). Interactions Among Wildland Fires in a Long-Established Sierra Nevada Natural Fire Area. Ecosystems, 12: 114–128.](https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf)
+
