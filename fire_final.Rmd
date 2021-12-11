@@ -15,7 +15,6 @@ library(prettymapr)
 library(yaps)
 library(rgdal)
 library(raster)
-
 ```  
 
 ```{r setup, include=FALSE}
@@ -131,6 +130,7 @@ yos_fires %>%
 
 # purple dotted line falls at year 1972, the beginning of the managed wildfire period
 ```
+
 Our first chart shows the number of fires that occurred each year within the bounds of Yosemite National Park. The number of fires each year increased dramatically after 1972 (purple dotted line), when the NPS changed its policy to allow for managed wildfire. The period of fire suppression prior to 1972 experienced few fires. In more recent years, we see a spike in the number of fires; this is likely due to [climate change](https://www.washingtonpost.com/politics/2020/12/22/biden-wildfires/). 
 
 ```{r}
@@ -143,6 +143,7 @@ yos_fires %>%
   labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 ```
+
 Another way to represent the change in fire patterns after the introduction of managed wildfire is through area burned. Similar to the previous chart, we see an increase in acres burned in Yosemite National Park after 1972 (represented by the purple line). 
 
 Total burn area can be a more useful variable than number of fires for understanding ecosystem impacts because it tells us about how much of the landscape was impacted by fire. We can see that while both the number of annual fires and acres burned increase after 1972, they do not share an identical pattern. This means that some years may have experienced more frequent but smaller fires while other years may have experience fewer but large fires. Another critical variable for understanding the ecosystem impacts of fire is burn severity, but we chose not to examine that here. 
@@ -178,14 +179,6 @@ landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
 # NDVI = (NIR - Red) / (NIR + Red)
 landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
 
-# plot the data
-tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title="NDVI Index Value") + 
-  tm_shape(icb_shp) + tm_polygons(alpha=0) +
-  tm_compass(size=1) + tm_scale_bar() + 
-  tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE)
-
-```
-```{r}
 # adjusting for different resolution in Landsat data from 1972 and 2021
 resampled_ndvi21 <- resample(landsat_ndvi, landsat_ndvi72, method = "bilinear")
 
@@ -195,7 +188,6 @@ tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, ti
   tm_compass(size=1) + tm_scale_bar() + 
   tm_credits("resampled to 60m spatial resolution", position=c("RIGHT", "BOTTOM"))
 ```
-
 
 ```{r, message=FALSE, warning=FALSE}
 # cropping NDVI rasters to ICB boundary
@@ -231,6 +223,8 @@ median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 
 ```
 
+## Conclusion
+As one of the longest standing areas with natural fire reintroduced following the suppression era, the Illilouette Creek Basin is a key location for examining the impacts of managed wildfire. Understanding how the vegetation, biodiversity, and water resources have changed in the ICB is important for the application of managed wildfire to other wilderness areas. Based on numerous long-term studies of the ICB, there is a strong case for the use of managed wildfire as a strategy to increase forest resiliency in the Sierra Nevada in the face of frequent drought and warmer temperatures. Other wilderness areas, such as the Sugarloaf Creek Basin in Kings Canyon National Park, have also introduced managed wildfire and are seeing the resulting benefits. If used on a broader scale, this strategy has great potential to protect and improve the health of forest ecosystems in California under rapidly changing climatic conditions in the future. 
 
 ## Sources
 
@@ -258,7 +252,11 @@ Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
     
 ### Papers for Reference
 
-https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe
-https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf
-https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf 
-https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf
+[Boisrame, G., Thompson, S., Collins, B., Stephens, S. (2016). Managed Wildfire Effects on Forest Resilience and Water in the Sierra Nevada. Ecosystems, 20(4).](https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe)
+
+[Hedges, R., Boisrame, G. (2019). Illilouette Creek Basin Research and Publications. UC Berkeley Stephens Lab.](https://nature.berkeley.edu/stephenslab/wp-content/uploads/2019/10/Illouette_Creek_Basin_Summary_FINAL.pdf)
+
+[Stephens, S. et al. (2021). Fire, water, and biodiversity in the Sierra Nevada: a possible triple win. Environmental Research Communications, 3.](https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf)
+
+[Collins, B.M. et al. (2009). Interactions Among Wildland Fires in a Long-Established Sierra Nevada Natural Fire Area. Ecosystems, 12: 114–128.](https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf)
+
