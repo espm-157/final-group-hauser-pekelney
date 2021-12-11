@@ -30,15 +30,20 @@ The Illilouette Creek Basin (ICB) is a [150 km^2^ area within Yosemite National 
 
 The ICB is a critical zone for research into the potential for managed wildfire to be used more broadly throughout Sierra Nevada forests to increase resiliency in the face of climate change. Only [8 hectares](https://escholarship.org/content/qt7c71t4mr/qt7c71t4mr.pdf?t=onishe) are known to have burned in the ICB between 1880-1973, whereas post-1972 over 50% of the total area in the basin has burned. 
 
-Overview of fire as an ecological process and indigenous fire use
+Native tribes across the country have been practicing cultural burning for [millennia](https://www.nps.gov/subjects/fire/indigenous-fire-practices-shape-our-land.htm). [Yosemite](https://atmos.earth/yosemite-indigenous-wildfire-history/) is no exception. Many tribes have lived in and visited Yosemite, including the Paiute and Mono tribes, the Sierra Miwoks, and the Ahwahnechee people. Tribes in the area practiced burning to cultivate resources, such as those for basketry and nutrition, to entertain, and to practice spiritual rituals. Their stewardship of the land created a patchy mosaic across the landscape that allowed for more species diversity and a more accessible landscape. As tribal chairman of the North Fork Mono, [Ron Goode](https://www.npr.org/2020/08/24/899422710/to-manage-wildfire-california-looks-to-what-tribes-have-known-all-along), said, “It's been in use for thousands and thousands of years. And so what we're doing out here is restoring life."
+
+When settlers made it out West, however, they brutally punished cultural burning. “They didn't understand fire in the sense of the tool that it could be to create and what it did to help generate and rejuvenate the land,” said Ron Goode, “so they brought in suppression." Out of ignorance and racism, colonists destroyed a landscape that had been carefully looked after for generations.
+
+Fire suppression led to increased forest density, decreased biodiversity, and increased fuel loads. The fuel — primarily small trees and decaying branches — has piled up over the centuries of suppression, leading to calamitous conditions that result in massive, destructive fires. Having understood the importance of wildfire as a tool for ecosystem management, Yosemite National Park [reintroduced wildfire](https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2) in 1972 in the ICB. Since then, fires that are naturally ignited in the ICB region are allowed to burn, unless they pose a threat to human life. [Scientific literature](https://link.springer.com/content/pdf/10.1007/s10021-008-9211-7.pdf) resoundingly agrees that the fires have been absolutely positive for the forest, whether it’s because it increases the watershed, expands biodiversity, or one of many other positive outcomes.
 
 Based on the [scientific literature](https://iopscience.iop.org/article/10.1088/2515-7620/ac17e2/pdf), forest ecologists have concluded that the reintroduction of wildfire reduces forest density and increases biodiversity through type conversion to shrubs and meadows in addition to mixed conifer forest. We wanted to examine this change by looking at NDVI values before and after the introduction of managed wildfire. [NDVI (Normalized Difference Vegetation Index)](https://www.usgs.gov/special-topics/remote-sensing-phenology/science/ndvi-foundation-remote-sensing-phenology) is a measure of relative greeness or vegetation health. Our hypothesis was that NDVI in the ICB would have decreased overtime after the introduction of managed wildfire due to this type conversion. 
 
 - number of fires burned there, overview on the role of fire as an ecosystem process, what we would expect to see in terms of dNDVI between 1972 and present
 
+
 ## Fire perimeters in the ICB
 
-First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for Yosemite National Park as a whole to contextualize the change in fire patterns after 1972. 
+First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for [Yosemite National Park](https://irma.nps.gov/DataStore/Reference/Profile/2170436) as a whole to contextualize the change in fire patterns after 1972. We mapped fire perimeters onto a true color Landsat basemap. 
 
 ```{r, results= 'hide', message=FALSE, warning=FALSE}
 dir.create("../data/fireperimeters")
@@ -55,6 +60,44 @@ landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 
 # re-project fire perimeters to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
 fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
+```
+
+```{r, results=hide, message=FALSE, warning=FALSE}
+# accessing boundary for Yosemite National Park
+dir.create("../data/yosemiteboundary")
+download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
+unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
+      exdir = "../data/yosemiteboundary/yosemiteboundary")
+
+yos_bound_nad83 = st_read("../data/yosemiteboundary/yosemiteboundary")
+
+# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
+yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
+```
+
+#### Fire Perimeters Mapped onto true color Landsat basemap
+The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed in red. 
+```{r, message=FALSE}
+landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
+rgb = brick(landsat_refl_21)
+rgb_stack = stack(rgb)
+
+cropped = crop(rgb, yos_bound)
+
+fire_shp = st_read("California_Wildland_Fire_Perimeters_(All)/California_Wildland_Fire_Perimeters_(All).shp")
+fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
+
+keep <- st_is_valid(fire_shp_reproj)
+
+tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
+  fire_shp_reproj %>% filter(keep) %>% tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
+  tm_shape(yos_bound, name="Yosemite Nat'l Park") + tm_polygons(border.col = "blue",  alpha = 0) + 
+  tm_shape(icb_shp, name="ICB") + tm_polygons(border.col = "white",  alpha = 0) +
+  tm_compass(size=1) + tm_scale_bar(size=0.3) + 
+  tm_layout(legend.outside=TRUE, 
+            main.title="Fire Perimeters in Yosemite National Park",
+            legend.text.size = 0.5,
+            legend.position = c("left", "bottom"))
 ```
 
 ```{r}
@@ -94,31 +137,42 @@ yos_fires %>%
   labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 ```
-Another way to represent the change in fire patterns after the introduction of managed wildfire is through 
+Another way to represent the change in fire patterns after the introduction of managed wildfire is through area burned. Similar to the previous chart, we see an increase in acres burned in Yosemite National Park after 1972 (represented by the purple line). 
 
-```{r, results=hide, message=FALSE, warning=FALSE}
-# unzipping boundary for Yosemite National Park
-dir.create("../data/yosemiteboundary")
-download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
-unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
-      exdir = "../data/yosemiteboundary/yosemiteboundary")
+Total burn area can be a more useful variable than number of fires for understanding ecosystem impacts because it tells us about how much of the landscape was impacted by fire. We can see that while both the number of annual fires and acres burned increase after 1972, they do not share an identical pattern. This means that some years may have experienced more frequent but smaller fires while other years may have experience fewer but large fires. Another critical variable for understanding the ecosystem impacts of fire is burn severity, but we chose not to examine that here. 
 
-yos_bound_nad83 = st_read("../data/yosemiteboundary/yosemiteboundary")
 
-# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
-yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
-```
+## Visualizing NDVI
 
+Moving into the next part of our analysis, we sought to calculate NDVI in the ICB. Because of the challenges of importing and analyzing large amounts of raster data, we opted to compare Landsat imagery from 1972 and 2021 rather than at regular intervals over this time period. We selected images from the same time of year for both 1972 and 2021 to minimize any differences due to seasonal fluctuations. 
+
+NDVI is calculated using the red and near infrared (NIR) bands. The first Landsat satellite, Landsat 1, has different band designations than Landsat 8, which is currently in orbit. We made sure to select the band numbers corresponding to red and NIR for each Landsat satellite respectively. The spatial resolution also differs between Landsat 1 (60m) and Landsat 8 (30m). To make comparisons between the two, we resampled our 2021 Landsat image to 60m spatial resolution to match the imagery from 1972. 
 ```{r}
-# Landsat rasters for 9/15/21
-landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
-landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
+# Landsat rasters for 9/16/1972
+landsat72_raster_b5 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B5.TIF")
+landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
 
 # projected so everything is in WGS 84 / UTM Zone 10N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
 icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
 # confirming that it successfully re-projected 
 st_crs(icb_shp)
+
+# for Landsat 1-3 [B5 = red and B7 = NIR] 
+# NDVI = (NIR - Red) / (NIR + Red)
+landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raster_b7 + landsat72_raster_b5)
+
+# plot the data
+tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + tm_raster(midpoint = 0, title="NDVI Index Value") + 
+  tm_shape(icb_shp) + tm_polygons(alpha=0) +
+  tm_compass(size=1) + tm_scale_bar() + 
+  tm_layout(main.title="NDVI in ICB (1972)", legend.outside = TRUE)
+```
+
+```{r}
+# Landsat rasters for 9/15/21
+landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
+landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
 
 # for Landsat 8 [B4 = Red and B5 = NIR]
 # NDVI = (NIR - Red) / (NIR + Red)
@@ -131,24 +185,6 @@ tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title=
   tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE)
 
 ```
-
-```{r}
-# Landsat rasters for 9/16/1972
-landsat72_raster_b5 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B5.TIF")
-landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
-
-# for Landsat 1-3 [B5 = red and B7 = NIR] 
-# NDVI = (NIR - Red) / (NIR + Red)
-landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raster_b7 + landsat72_raster_b5)
-
-# plot the data
-tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + tm_raster(midpoint = 0, title="NDVI Index Value") + 
-  tm_shape(icb_shp) + tm_polygons(alpha=0) +
-  tm_compass(size=1) + tm_scale_bar() + 
-  tm_layout(main.title="NDVI in ICB (1972)", legend.outside = TRUE)
-
-```
-
 ```{r}
 # adjusting for different resolution in Landsat data from 1972 and 2021
 resampled_ndvi21 <- resample(landsat_ndvi, landsat_ndvi72, method = "bilinear")
@@ -157,8 +193,7 @@ tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, ti
   tm_shape(icb_shp) + tm_polygons(alpha=0) +
   tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE) +
   tm_compass(size=1) + tm_scale_bar() + 
-  tm_credits("resampled to 60x60m resolution", position=c("RIGHT", "BOTTOM"))
-
+  tm_credits("resampled to 60m spatial resolution", position=c("RIGHT", "BOTTOM"))
 ```
 
 
@@ -192,53 +227,6 @@ mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
 median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 # average NDVI in ICB is higher in 2021 than 1972
-
-```
-
-```{r}
-# charting distributions of NDVI without resampling raster resolution
-
-df21 = as.data.frame(cropped21) %>%
-  mutate(range = cut(LC08_L1TP_042034_20210915_20210925_02_T1_B5, c(-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1))) %>%
-  group_by(range) %>%
-  summarise(n=n()) %>%
-  mutate(percent = 100 * n/(531* 590))
-
-df72 = as.data.frame(cropped72) %>%
-  mutate(range = cut(LM01_L1TP_045034_19720916_20200909_02_T2_B7, c(-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1))) %>%
-  group_by(range) %>%
-  summarise(n=n()) %>%
-  mutate(percent = 100 * n/(265*295))
-
-colors = c("1972" = "yellow", "2021" = "blue")
-
-ggplot() + 
-geom_col(data=df21, aes(x=range, y=percent), fill='blue', color = "blue") + 
-geom_col(data=df72, aes(x=range, y=percent), fill='yellow', color = "yellow", alpha = .8) + ggtitle("Distribution of NDVI values in the ICB: 2021 (blue) and 1972 (yellow)")
-```
-
-## Fire Perimeters Mapped onto true color Landsat basemap
-```{r, message=FALSE}
-landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
-rgb = brick(landsat_refl_21)
-rgb_stack = stack(rgb)
-
-cropped = crop(rgb, yos_bound)
-
-fire_shp = st_read("California_Wildland_Fire_Perimeters_(All)/California_Wildland_Fire_Perimeters_(All).shp")
-fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
-
-keep <- st_is_valid(fire_shp_reproj)
-
-tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
-  fire_shp_reproj %>% filter(keep) %>% tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
-  tm_shape(yos_bound, name="Yosemite Nat'l Park") + tm_polygons(border.col = "blue",  alpha = 0) + 
-  tm_shape(icb_shp, name="ICB") + tm_polygons(border.col = "white",  alpha = 0) +
-  tm_compass(size=1) + tm_scale_bar(size=0.3) + 
-  tm_layout(legend.outside=TRUE, 
-            main.title="Fire Perimeters in Yosemite National Park",
-            legend.text.size = 0.5,
-            legend.position = c("left", "bottom"))
 
 ```
 
