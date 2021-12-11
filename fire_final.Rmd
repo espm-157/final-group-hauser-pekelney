@@ -15,14 +15,13 @@ library(prettymapr)
 library(yaps)
 library(rgdal)
 library(raster)
-
 ```  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire
+# NDVI in the Illilouette Creek Basin: Examining changes after the introduction of managed wildfire
 
 ## Introduction
 
@@ -179,14 +178,6 @@ landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
 # NDVI = (NIR - Red) / (NIR + Red)
 landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + landsat_raster_b4)
 
-# plot the data
-tm_shape(landsat_ndvi, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title="NDVI Index Value") + 
-  tm_shape(icb_shp) + tm_polygons(alpha=0) +
-  tm_compass(size=1) + tm_scale_bar() + 
-  tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE)
-
-```
-```{r}
 # adjusting for different resolution in Landsat data from 1972 and 2021
 resampled_ndvi21 <- resample(landsat_ndvi, landsat_ndvi72, method = "bilinear")
 
@@ -196,7 +187,6 @@ tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, ti
   tm_compass(size=1) + tm_scale_bar() + 
   tm_credits("resampled to 60m spatial resolution", position=c("RIGHT", "BOTTOM"))
 ```
-
 
 ```{r, message=FALSE, warning=FALSE}
 # cropping NDVI rasters to ICB boundary
@@ -232,6 +222,8 @@ median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 
 ```
 
+## Conclusion
+As one of the longest standing areas with natural fire reintroduced following the suppression era, the Illilouette Creek Basin is a key location for examining the impacts of managed wildfire. Understanding how the vegetation, biodiversity, and water resources have changed in the ICB is important for the application of managed wildfire to other wilderness areas. Based on numerous long-term studies of the ICB, there is a strong case for the use of managed wildfire as a strategy to increase forest resiliency in the Sierra Nevada in the face of frequent drought and warmer temperatures. Other wilderness areas, such as the Sugarloaf Creek Basin in Kings Canyon National Park, have also introduced managed wildfire and are seeing the resulting benefits. If used on a broader scale, this strategy has great potential to protect and improve the health of forest ecosystems in California under rapidly changing climatic conditions in the future. 
 
 ## Sources
 
