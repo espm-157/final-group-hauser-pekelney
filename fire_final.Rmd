@@ -44,14 +44,14 @@ Based on the [scientific literature](https://iopscience.iop.org/article/10.1088/
 First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for [Yosemite National Park](https://irma.nps.gov/DataStore/Reference/Profile/2170436) as a whole to contextualize the change in fire patterns after 1972. We mapped fire perimeters onto a true color Landsat basemap. 
 
 ```{r, results= 'hide', message=FALSE, warning=FALSE}
-dir.create("/data/fireperimeters")
-download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "/data/fireperimeters/fire20_1.zip")
-unzip("/data/fireperimeters/fire20_1.zip", 
-      exdir = "/data/fireperimeters/fireperimeters")
+dir.create("data/fireperimeters")
+download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "data/fireperimeters/fire20_1.zip")
+unzip("data/fireperimeters/fire20_1.zip", 
+      exdir = "data/fireperimeters/fireperimeters")
 ```
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
-fireperimeters_nad83 = st_read("/data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
+fireperimeters_nad83 = st_read("data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
 
 # load Landsat raster first to have CRS available for reference
 landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
@@ -62,13 +62,13 @@ fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 
 ```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
 # accessing boundary for Yosemite National Park
-dir.create("/data/yosemiteboundary")
-download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "/data/yosemiteboundary/Yose_Boundary.zip")
+dir.create("data/yosemiteboundary")
+download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "data/yosemiteboundary/Yose_Boundary.zip")
 
-unzip("/data/yosemiteboundary/Yose_Boundary.zip", 
-      exdir = "/data/yosemiteboundary/yosemiteboundary")
+unzip("data/yosemiteboundary/Yose_Boundary.zip", 
+      exdir = "data/yosemiteboundary/yosemiteboundary")
 
-yos_bound_nad83 = st_read("/data/yosemiteboundary/yosemiteboundary")
+yos_bound_nad83 = st_read("data/yosemiteboundary/yosemiteboundary")
 
 # re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
 yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
