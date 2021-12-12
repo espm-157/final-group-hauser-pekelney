@@ -4,8 +4,8 @@ title: 'NDVI in the Illilouette Creek Basin: examining changes after the introdu
 author: "Rachel Pekelney & Joshua Hauser"
 date: 'Updated: 12 December 2021'
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r options, include= FALSE, warning = FALSE}
@@ -103,9 +103,7 @@ tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
   tm_compass(size=1) + tm_scale_bar(size=0.3) + 
   tm_layout(legend.outside=TRUE, 
             main.title="Fire Perimeters in Yosemite Nat'l Park",
-            title.size=0.2,
-            legend.text.size = 0.5,
-            legend.position = c("left", "bottom"))
+            title.size=0.4)
 ```
 
 Darker yellow and red areas indicate locations where there have been repeated fires. We see a pattern of repeated fire in the ICB and a few other locations on the western side of the park. There have been fewer fires on the eastern side of the park, likely because much of this region is at higher elevations with sparser forest. 
