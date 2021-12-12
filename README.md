@@ -6,7 +6,7 @@
 - Rachel Pekelney, rpekelney https://github.com/rpekelney
 - Joshua Hauser, jdhauser99 https://github.com/jdhauser99
 
-Link for site: https://htmlpreview.github.io/?https://github.com/espm-157/final-group-hauser-pekelney/blob/master/fire_final.html
+Link for site (only when our repository is public. As of 12/12/2021, private. For now, please see the PDF!): https://htmlpreview.github.io/?https://github.com/espm-157/final-group-hauser-pekelney/blob/master/fire_final.html
 ## NDVI in the Illilouette Creek Basin: Examining changes after the introduction of managed wildfire 🔥 🌲
 
 Hello! Welcome to our repository. Here, we assessed how the introdution of managed wildfire in Yosemite National Park — the Illilouette Creek Basin, specifically — led to significant changes in vegetation. We hope this work will be used to further support the need to introduce wildfire back into ecosystems across the country.
