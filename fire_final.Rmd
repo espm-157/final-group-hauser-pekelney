@@ -39,7 +39,7 @@ Based on the [scientific literature](https://iopscience.iop.org/article/10.1088/
 
 ## Fire perimeters in the ICB
 
-First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for [Yosemite National Park](https://irma.nps.gov/DataStore/Reference/Profile/2170436) as a whole to contextualize the change in fire patterns after 1972. We mapped fire perimeters onto a true color Landsat basemap. 
+First, we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for [Yosemite National Park](https://irma.nps.gov/DataStore/Reference/Profile/2170436) as a whole to contextualize the change in fire patterns after 1972. We mapped fire perimeters onto a true color Landsat basemap. 
 
 ```{r, results= 'hide', message=FALSE, warning=FALSE}
 dir.create("data/fireperimeters")
@@ -73,7 +73,7 @@ yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
 ```
 
 #### Fire Perimeters Mapped onto true color Landsat basemap
-The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed in red. 
+The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed with red borders and yellow fill. 
 ```{r, message=FALSE, warning=FALSE}
 # projected so everything is in WGS 84 / UTM Zone 10N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
@@ -83,7 +83,6 @@ st_crs(icb_shp)
 
 landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
-rgb_stack = stack(rgb)
 
 cropped = crop(rgb, yos_bound)
 
@@ -93,17 +92,22 @@ fire_shp_reproj = st_transform(fire_shp, crs(landsat_raster_b4))
 keep <- st_is_valid(fire_shp_reproj)
 
 tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
-  fire_shp_reproj %>% filter(keep) %>% tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
-  tm_shape(yos_bound, name="Yosemite Nat'l Park") + tm_polygons(border.col = "blue",  alpha = 0) + 
+  fire_shp_reproj %>% filter(keep) %>% 
+  tm_shape(name="Fire Perimeters", bbox = st_bbox(yos_bound)) + 
+  tm_polygons(col = "yellow", border.col = "red", alpha = 0.1, lwd = 1) + 
+  tm_shape(yos_bound, name="Yosemite Nat'l Park") + 
+  tm_polygons(border.col = "blue",  alpha = 0) + 
   tm_shape(icb_shp, name="ICB") + tm_polygons(border.col = "white",  alpha = 0) +
   tm_compass(size=1) + tm_scale_bar(size=0.3) + 
   tm_layout(legend.outside=TRUE, 
-            main.title="Fire Perimeters in Yosemite National Park",
+            main.title="Fire Perimeters in Yosemite Nat'l Park",
+            title.size=0.2,
             legend.text.size = 0.5,
             legend.position = c("left", "bottom"))
 ```
+Darker yellow and red areas indicate locations where there have been repeated fires. We see a pattern of repeated fire in the ICB and a few other locations on the western side of the park. There have been fewer fires on the eastern side of the park, likely because much of this region is at higher elevations with sparser forest. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 fireperimetersCA = as_tibble(fireperimeters) 
 
 # fire perimeters in Yosemite, post-1972 only
@@ -131,7 +135,7 @@ yos_fires %>%
 
 Our first chart shows the number of fires that occurred each year within the bounds of Yosemite National Park. The number of fires each year increased dramatically after 1972 (purple dotted line), when the NPS changed its policy to allow for managed wildfire. The period of fire suppression prior to 1972 experienced few fires. In more recent years, we see a spike in the number of fires; this is likely due to [climate change](https://www.washingtonpost.com/politics/2020/12/22/biden-wildfires/). 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 yos_fires %>% 
   mutate(YEAR_, Year = as.numeric(YEAR_)) %>%
   dplyr::select(Year, GIS_ACRES) %>%
@@ -141,6 +145,7 @@ yos_fires %>%
   labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 ```
+While the earliest year on record in this dataset is 1933, it is important to note that the period of fire suppression extended further back into the mid 19th century. 
 
 Another way to represent the change in fire patterns after the introduction of managed wildfire is through area burned. Similar to the previous chart, we see an increase in acres burned in Yosemite National Park after 1972 (represented by the purple line). 
 
@@ -152,7 +157,7 @@ Total burn area can be a more useful variable than number of fires for understan
 Moving into the next part of our analysis, we sought to calculate NDVI in the ICB. Because of the challenges of importing and analyzing large amounts of raster data, we opted to compare Landsat imagery from 1972 and 2021 rather than at regular intervals over this time period. We selected images from the same time of year for both 1972 and 2021 to minimize any differences due to seasonal fluctuations. 
 
 NDVI is calculated using the red and near infrared (NIR) bands. The first Landsat satellite, Landsat 1, has different band designations than Landsat 8, which is currently in orbit. We made sure to select the band numbers corresponding to red and NIR for each Landsat satellite respectively. The spatial resolution also differs between Landsat 1 (60m) and Landsat 8 (30m). To make comparisons between the two, we resampled our 2021 Landsat image to 60m spatial resolution to match the imagery from 1972. 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Landsat rasters for 9/16/1972
 landsat72_raster_b5 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B5.TIF")
 landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
@@ -162,13 +167,14 @@ landsat72_raster_b7 <- rast("LM01_L1TP_045034_19720916_20200909_02_T2_B7.TIF")
 landsat_ndvi72 <- (landsat72_raster_b7 - landsat72_raster_b5) / (landsat72_raster_b7 + landsat72_raster_b5)
 
 # plot the data
-tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + tm_raster(midpoint = 0, title="NDVI Index Value") + 
+tm_shape(landsat_ndvi72, bbox = st_bbox(icb_shp), title="NDVI") + 
+  tm_raster(midpoint = 0, title="NDVI Index Value") + 
   tm_shape(icb_shp) + tm_polygons(alpha=0) +
   tm_compass(size=1) + tm_scale_bar() + 
   tm_layout(main.title="NDVI in ICB (1972)", legend.outside = TRUE)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Landsat rasters for 9/15/21
 landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 landsat_raster_b5 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B5.TIF")
@@ -180,12 +186,15 @@ landsat_ndvi <- (landsat_raster_b5 - landsat_raster_b4) / (landsat_raster_b5 + l
 # adjusting for different resolution in Landsat data from 1972 and 2021
 resampled_ndvi21 <- resample(landsat_ndvi, landsat_ndvi72, method = "bilinear")
 
-tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + tm_raster(midpoint = 0, title="NDVI Index Value") + 
+tm_shape(resampled_ndvi21, bbox = st_bbox(icb_shp)) + 
+  tm_raster(midpoint = 0, title="NDVI Index Value") + 
   tm_shape(icb_shp) + tm_polygons(alpha=0) +
   tm_layout(main.title="NDVI in ICB (2021)", legend.outside = TRUE) +
   tm_compass(size=1) + tm_scale_bar() + 
   tm_credits("resampled to 60m spatial resolution", position=c("RIGHT", "BOTTOM"))
 ```
+
+Upon visual inspection, the NDVI in 1972 seems lower than in 2021. To better understand this difference and to assess if there was a change in NDVI, we plotted the distribution of NDVI values across the ICB for both years and overlaid them on a single chart:
 
 ```{r, message=FALSE, warning=FALSE}
 # cropping NDVI rasters to ICB boundary
@@ -199,27 +208,45 @@ df_72 = as.data.frame(cropped72)
 
 ggplot() + 
   geom_histogram(data=df_21, 
-                 aes(x=LC08_L1TP_042034_20210915_20210925_02_T1_B5, fill=LC08_L1TP_042034_20210915_20210925_02_T1_B5),
+                 aes(
+                   x=LC08_L1TP_042034_20210915_20210925_02_T1_B5, 
+                   fill=LC08_L1TP_042034_20210915_20210925_02_T1_B5),
                  fill="blue",
                  color="blue",
-                 alpha = .9) + 
+                 alpha = .85) + 
   geom_histogram(data=df_72, 
-                 aes(x=LM01_L1TP_045034_19720916_20200909_02_T2_B7, fill=LM01_L1TP_045034_19720916_20200909_02_T2_B7), 
+                 aes(
+                   x=LM01_L1TP_045034_19720916_20200909_02_T2_B7, 
+                   fill=LM01_L1TP_045034_19720916_20200909_02_T2_B7), 
                  fill="yellow",
                  color="yellow",
                  alpha = .8) + 
   ggtitle("Distribution of NDVI values in the ICB: 2021 (blue) vs 1972 (yellow)") +
   labs(x = "NDVI Index Value", y = "Frequency", subtitle = "Landsat rasters 60x60m resolution")
 
-# calculate a deltaNDVI between average NDVI in 1972 and 2021
-mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
-mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
+# comparing mean NDVI in ICB in 1972 vs 2021
+mean_21 = mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+mean_72 = mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 
-median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
-median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
-# average NDVI in ICB is higher in 2021 than 1972
+# comparing median NDVI in ICB in 1972 vs 2021
+med_21 = median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+med_72 = median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 
+print(paste("Mean NDVI in ICB in 1972:", mean_72))
+print(paste("Mean NDVI in ICB in 2021:", mean_21))
+
+print(paste("Median NDVI in ICB in 1972:", med_72))
+print(paste("Median NDVI in ICB in 2021:", med_21))
 ```
+
+We found that the average and median NDVI values in the ICB were higher in 2021 than in 1972 before the introduction of managed wildfire. There appears to be more variation in NDVI values in 1972 (the distribution is wider) relative to 2021 (the distribution is narrower). 
+
+Researchers have studied vegetation change in the ICB since the beginning of the managed wildfire period, observing that shrub and meadow areas have increased where there was previously dense mixed conifer forest. Our initial intuition was that denser forest areas would have a higher NDVI compared to forested areas combined with shrubs and meadows. While healthy forests, shrubs, and meadows (and other live vegetation) should all have a positive NDVI, it appears that there is not a major difference between NDVI values for these vegetation types. Statistical significance testing would be required to make any further conclusions about whether or not there is a difference. 
+
+One limitation to our analysis is that we chose only two years to make our comparison. We also did not account for fires or other disturbances that may have occurred quite recently before the two images were taken and which could have an impact on NDVI. Fires, drought, and windstorms that knock over trees and kill vegetation can impact NDVI calculations. To make our comparison more robust, it would have been beneficial to compare multiple historical Landsat images to multiple present-day Landsat images. 
+
+Another limitation to using NDVI as a single metric for studying vegetation change is that it does not tell us about the fine scale changes occurring on the ground. This is generally true of remotely sensed data; while it can be an incredibly useful tool for examining landscape-level processes and changes, it does not explain why changes occur nor what the overall ecosystems impacts may be. Thus, it is necessary to couple analyses of remotely sensed data with on-the-ground field observations. 
+
 
 ## Conclusion
 As one of the longest standing areas with natural fire reintroduced following the suppression era, the Illilouette Creek Basin is a key location for examining the impacts of managed wildfire. Understanding how the vegetation, biodiversity, and water resources have changed in the ICB is important for the application of managed wildfire to other wilderness areas. Based on numerous long-term studies of the ICB, there is a strong case for the use of managed wildfire as a strategy to increase forest resiliency in the Sierra Nevada in the face of frequent drought and warmer temperatures. Other wilderness areas, such as the Sugarloaf Creek Basin in Kings Canyon National Park, have also introduced managed wildfire and are seeing the resulting benefits. If used on a broader scale, this strategy has great potential to protect and improve the health of forest ecosystems in California under rapidly changing climatic conditions in the future. 
@@ -228,24 +255,27 @@ As one of the longest standing areas with natural fire reintroduced following th
 
 ### Fire Perimeters: 
 [CAL FIRE Fire Perimeters](https://data.ca.gov/dataset/fire-perimeters1) downloaded from the CA State Open Data Portal, updated Dec. 2021 (used for mapping)
+
 [FRAP Fire Perimeters](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) (used for charting area burned annually and fires per year in Yosemite)
 
 ### ICB Shapefile:
 Sourced from [Dr. Brandon M. Collins](https://nature.berkeley.edu/stephenslab/lab-members/dr-brandon-collins/), Berkeley Forests
 
 ### Yosemite Nat'l Park Boundary: 
-Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataStore/)
+Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataStore/), 
 [Park boundary updated as of 2006](https://irma.nps.gov/DataStore/Reference/Profile/2170436)
 
 ### Landsat Rasters:
 Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
-  [Landsat 1-3](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
-    Band 5 = red
-    Band 7 = NIR
+
+  [Landsat 1-3:](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
+    Band 5 = red, 
+    Band 7 = NIR, 
     date: 9/16/1972
-  [Landsat 8](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
-    Band 4 = red
-    Band 5 = NIR
+    
+  [Landsat 8:](https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites?qt-news_science_products=0#qt-news_science_products)
+    Band 4 = red, 
+    Band 5 = NIR, 
     date: 9/15/2021
     
 ### Papers for Reference
