@@ -1,7 +1,7 @@
 ---
-title: "fire.Rmd"
+title: "NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire"
 author: "Rachel Pekelney & Joshua Hauser"
-date: "11/28/2021"
+date: "Updated: 12 December 2021"
 output: html_document
 ---
 
@@ -21,7 +21,6 @@ library(raster)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# NDVI in the Illilouette Creek Basin: Examining changes after the introduction of managed wildfire
 
 ## Introduction
 
@@ -43,14 +42,14 @@ Based on the [scientific literature](https://iopscience.iop.org/article/10.1088/
 First we examined [historical fire data](https://frap.fire.ca.gov/frap-projects/fire-perimeters/) for [Yosemite National Park](https://irma.nps.gov/DataStore/Reference/Profile/2170436) as a whole to contextualize the change in fire patterns after 1972. We mapped fire perimeters onto a true color Landsat basemap. 
 
 ```{r, results= 'hide', message=FALSE, warning=FALSE}
-dir.create("../data/fireperimeters")
-download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "../data/fireperimeters/fire20_1.zip")
-unzip("../data/fireperimeters/fire20_1.zip", 
-      exdir = "../data/fireperimeters/fireperimeters")
+dir.create("data/fireperimeters")
+download.file("https://frap.fire.ca.gov/media/50dgwqrb/fire20_1.zip", "data/fireperimeters/fire20_1.zip")
+unzip("data/fireperimeters/fire20_1.zip", 
+      exdir = "data/fireperimeters/fireperimeters")
 ```
 
-```{r, message=FALSE, warning=FALSE}
-fireperimeters_nad83 = st_read("../data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
+```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
+fireperimeters_nad83 = st_read("data/fireperimeters/fireperimeters/fire20_1.gdb", layer = "firep20_1")
 
 # load Landsat raster first to have CRS available for reference
 landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
@@ -59,15 +58,15 @@ landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, include=FALSE, results=FALSE}
 # accessing boundary for Yosemite National Park
-dir.create("../data/yosemiteboundary")
-download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "../data/yosemiteboundary/Yose_Boundary.zip")
+dir.create("data/yosemiteboundary")
+download.file("https://irma.nps.gov/DataStore/DownloadFile/427871", "data/yosemiteboundary/Yose_Boundary.zip")
 
-unzip("../data/yosemiteboundary/Yose_Boundary.zip", 
-      exdir = "../data/yosemiteboundary/yosemiteboundary")
+unzip("data/yosemiteboundary/Yose_Boundary.zip", 
+      exdir = "data/yosemiteboundary/yosemiteboundary")
 
-yos_bound_nad83 = st_read("../data/yosemiteboundary/yosemiteboundary")
+yos_bound_nad83 = st_read("data/yosemiteboundary/yosemiteboundary")
 
 # re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
 yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
@@ -75,7 +74,7 @@ yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
 
 #### Fire Perimeters Mapped onto true color Landsat basemap
 The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed in red. 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 # projected so everything is in WGS 84 / UTM Zone 10N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
 icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
@@ -129,6 +128,7 @@ yos_fires %>%
 
 # purple dotted line falls at year 1972, the beginning of the managed wildfire period
 ```
+
 Our first chart shows the number of fires that occurred each year within the bounds of Yosemite National Park. The number of fires each year increased dramatically after 1972 (purple dotted line), when the NPS changed its policy to allow for managed wildfire. The period of fire suppression prior to 1972 experienced few fires. In more recent years, we see a spike in the number of fires; this is likely due to [climate change](https://www.washingtonpost.com/politics/2020/12/22/biden-wildfires/). 
 
 ```{r}
@@ -141,6 +141,7 @@ yos_fires %>%
   labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 ```
+
 Another way to represent the change in fire patterns after the introduction of managed wildfire is through area burned. Similar to the previous chart, we see an increase in acres burned in Yosemite National Park after 1972 (represented by the purple line). 
 
 Total burn area can be a more useful variable than number of fires for understanding ecosystem impacts because it tells us about how much of the landscape was impacted by fire. We can see that while both the number of annual fires and acres burned increase after 1972, they do not share an identical pattern. This means that some years may have experienced more frequent but smaller fires while other years may have experience fewer but large fires. Another critical variable for understanding the ecosystem impacts of fire is burn severity, but we chose not to examine that here. 
