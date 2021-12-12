@@ -54,7 +54,7 @@ fireperimeters_nad83 = st_read("data/fireperimeters/fireperimeters/fire20_1.gdb"
 # load Landsat raster first to have CRS available for reference
 landsat_raster_b4 <- rast("LC08_L1TP_042034_20210915_20210925_02_T1_B4.TIF")
 
-# re-project fire perimeters to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
+# re-project fire perimeters to same CRS as Landsat imagery: WGS 84 / UTM Zone 11N
 fireperimeters = st_transform(fireperimeters_nad83, crs(landsat_raster_b4))
 ```
 
@@ -68,19 +68,18 @@ unzip("data/yosemiteboundary/Yose_Boundary.zip",
 
 yos_bound_nad83 = st_read("data/yosemiteboundary/yosemiteboundary")
 
-# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 10N
+# re-project to same CRS as Landsat imagery: WGS 84 / UTM Zone 11N
 yos_bound = st_transform(yos_bound_nad83, crs(landsat_raster_b4))
 ```
 
 #### Fire Perimeters Mapped onto true color Landsat basemap
 The boundary of Yosemite National Park is shown in blue and the boundary of the ICB is shown in white. Historical fire perimeters are displayed with red borders and yellow fill. 
 ```{r, message=FALSE, warning=FALSE}
-# projected so everything is in WGS 84 / UTM Zone 10N
+# projected so everything is in WGS 84 / UTM Zone 11N
 icb_shp_nad83 <- st_read("ill_wtrshd_nad83.shp")
 icb_shp <- st_transform(icb_shp_nad83, crs(landsat_raster_b4))
-# confirming that it successfully re-projected 
-st_crs(icb_shp)
 
+# reading in RGB Landsat raster
 landsat_refl_21 = rast("LC08_L1TP_042034_20210915_20210925_02_T1_refl.tif")
 rgb = brick(landsat_refl_21)
 
@@ -105,6 +104,7 @@ tm_shape(cropped, bbox = st_bbox(yos_bound)) + tm_rgb() +
             legend.text.size = 0.5,
             legend.position = c("left", "bottom"))
 ```
+
 Darker yellow and red areas indicate locations where there have been repeated fires. We see a pattern of repeated fire in the ICB and a few other locations on the western side of the park. There have been fewer fires on the eastern side of the park, likely because much of this region is at higher elevations with sparser forest. 
 
 ```{r, message=FALSE, warning=FALSE}
@@ -145,6 +145,7 @@ yos_fires %>%
   labs(y = "Acres Burned", title = "Number of acres burned annually in Yosemite Nat'l Park (1933-2020)") +
   geom_vline(aes(xintercept=1972), color="purple", linetype="dotted")
 ```
+
 While the earliest year on record in this dataset is 1933, it is important to note that the period of fire suppression extended further back into the mid 19th century. 
 
 Another way to represent the change in fire patterns after the introduction of managed wildfire is through area burned. Similar to the previous chart, we see an increase in acres burned in Yosemite National Park after 1972 (represented by the purple line). 
@@ -225,18 +226,16 @@ ggplot() +
   labs(x = "NDVI Index Value", y = "Frequency", subtitle = "Landsat rasters 60x60m resolution")
 
 # comparing mean NDVI in ICB in 1972 vs 2021
-mean_21 = mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
-mean_72 = mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
+# mean NDVI in 1972
+mean(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+# mean NDVI in 2021
+mean(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 
 # comparing median NDVI in ICB in 1972 vs 2021
-med_21 = median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
-med_72 = median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
-
-print(paste("Mean NDVI in ICB in 1972:", mean_72))
-print(paste("Mean NDVI in ICB in 2021:", mean_21))
-
-print(paste("Median NDVI in ICB in 1972:", med_72))
-print(paste("Median NDVI in ICB in 2021:", med_21))
+# median NDVI in 1972
+median(df_21$LC08_L1TP_042034_20210915_20210925_02_T1_B5)
+# median NDVI in 2021
+median(df_72$LM01_L1TP_045034_19720916_20200909_02_T2_B7)
 ```
 
 We found that the average and median NDVI values in the ICB were higher in 2021 than in 1972 before the introduction of managed wildfire. There appears to be more variation in NDVI values in 1972 (the distribution is wider) relative to 2021 (the distribution is narrower). 
@@ -262,8 +261,8 @@ As one of the longest standing areas with natural fire reintroduced following th
 Sourced from [Dr. Brandon M. Collins](https://nature.berkeley.edu/stephenslab/lab-members/dr-brandon-collins/), Berkeley Forests
 
 ### Yosemite Nat'l Park Boundary: 
-Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataStore/), 
-[Park boundary updated as of 2006](https://irma.nps.gov/DataStore/Reference/Profile/2170436)
+Accessed via the [National Park Service Data Store](https://irma.nps.gov/DataStore/) 
+[(Park boundary updated as of 2006)](https://irma.nps.gov/DataStore/Reference/Profile/2170436)
 
 ### Landsat Rasters:
 Downloaded from the [USGS EarthExplorer](https://earthexplorer.usgs.gov)
