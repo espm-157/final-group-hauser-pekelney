@@ -1,8 +1,11 @@
 ---
-title: "NDVI in the Illilouette Creek Basin: examining changes after the introduction of managed wildfire"
+title: 'NDVI in the Illilouette Creek Basin: examining changes after the introduction
+  of managed wildfire'
 author: "Rachel Pekelney & Joshua Hauser"
-date: "Updated: 12 December 2021"
-output: html_document
+date: 'Updated: 12 December 2021'
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r options, include= FALSE, warning = FALSE}
