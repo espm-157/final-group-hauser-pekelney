@@ -4,8 +4,8 @@ title: 'NDVI in the Illilouette Creek Basin: examining changes after the introdu
 author: "Rachel Pekelney & Joshua Hauser"
 date: 'Updated: 12 December 2021'
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r options, include= FALSE, warning = FALSE}
